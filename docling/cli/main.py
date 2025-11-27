@@ -2,14 +2,15 @@ import importlib
 import logging
 import platform
 import re
+import json
 import sys
 import tempfile
 import time
 import warnings
-from collections.abc import Iterable
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional, Type
+from typing import Annotated, Dict, Iterable, List, Optional
 
+import rich
 import rich.table
 import typer
 from docling_core.transforms.serializer.html import (
@@ -207,6 +208,7 @@ def export_documents(
     export_md: bool,
     export_txt: bool,
     export_doctags: bool,
+    export_toon: bool,
     image_export_mode: ImageRefMode,
 ):
     success_count = 0
@@ -282,6 +284,14 @@ def export_documents(
                 fname = output_dir / f"{doc_filename}.doctags"
                 _log.info(f"writing Doc Tags output to {fname}")
                 conv_res.document.save_as_doctags(filename=fname)
+
+            # Export TOON format:
+            if export_toon:
+                from docling.utils.toon_export import save_as_toon
+
+                fname = output_dir / f"{doc_filename}.toon"
+                _log.info(f"writing TOON output to {fname}")
+                save_as_toon(conv_res.document, fname)
 
         else:
             _log.warning(f"Document {conv_res.input.file} failed to convert.")
@@ -607,6 +617,7 @@ def convert(  # noqa: C901
         export_md = OutputFormat.MARKDOWN in to_formats
         export_txt = OutputFormat.TEXT in to_formats
         export_doctags = OutputFormat.DOCTAGS in to_formats
+        export_toon = OutputFormat.TOON in to_formats
 
         ocr_factory = get_ocr_factory(allow_external_plugins=allow_external_plugins)
         ocr_options: OcrOptions = ocr_factory.create_options(  # type: ignore
@@ -879,6 +890,7 @@ def convert(  # noqa: C901
             export_md=export_md,
             export_txt=export_txt,
             export_doctags=export_doctags,
+            export_toon=export_toon,
             image_export_mode=image_export_mode,
         )
 

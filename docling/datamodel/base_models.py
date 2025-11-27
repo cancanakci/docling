@@ -79,6 +79,7 @@ class OutputFormat(str, Enum):
     HTML_SPLIT_PAGE = "html_split_page"
     TEXT = "text"
     DOCTAGS = "doctags"
+    TOON = "toon"
 
 
 FormatToExtensions: dict[InputFormat, list[str]] = {
